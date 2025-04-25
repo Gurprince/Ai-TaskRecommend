@@ -10,23 +10,6 @@ const fadeIn = {
 function Home() {
   return (
     <div className="font-inter bg-gray-50 min-h-screen">
-      {/* Sticky Navigation Bar */}
-      <nav className="bg-white shadow-md sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-indigo-600">LearnAI</h1>
-          <div className="flex gap-4">
-            <Link to="/login" className="text-gray-600 hover:text-indigo-600 font-semibold">
-              Log In
-            </Link>
-            <Link
-              to="/signup"
-              className="bg-indigo-600 text-white px-3 py-2 rounded-full font-semibold hover:bg-indigo-700"
-            >
-              Sign Up
-            </Link>
-          </div>
-        </div>
-      </nav>
 
       {/* Hero Section */}
       <motion.section

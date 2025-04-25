@@ -10,6 +10,14 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 // Capitalize first letter of a string
 const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
+// Clean markdown from response
+const cleanResponse = (text) => {
+  return text
+    .replace(/```json\s*([\s\S]*?)\s*```/, '$1')
+    .replace(/```\s*([\s\S]*?)\s*```/, '$1')
+    .trim();
+};
+
 export const recommendTasks = async (req, res) => {
   const { skill, time } = req.body;
   const userId = req.user.id;
@@ -53,14 +61,6 @@ Example:
 
 Ensure the response is valid JSON without markdown wrappers.
 `;
-
-  // Helper function to clean markdown from response
-  const cleanResponse = (text) => {
-    return text
-      .replace(/```json\s*([\s\S]*?)\s*```/, '$1')
-      .replace(/```\s*([\s\S]*?)\s*```/, '$1')
-      .trim();
-  };
 
   try {
     // Attempt with SDK
@@ -108,7 +108,7 @@ Ensure the response is valid JSON without markdown wrappers.
       goal: task.goal,
       type: task.type,
       resources: task.resources,
-      skill: normalizedSkill, // Store in lowercase
+      skill: normalizedSkill,
       status: 'pending'
     }).save();
 
@@ -182,7 +182,7 @@ Ensure the response is valid JSON without markdown wrappers.
         goal: task.goal,
         type: task.type,
         resources: task.resources,
-        skill: normalizedSkill, // Store in lowercase
+        skill: normalizedSkill,
         status: 'pending'
       }).save();
 
@@ -194,7 +194,6 @@ Ensure the response is valid JSON without markdown wrappers.
   }
 };
 
-// Fetch pending tasks
 export const getTasks = async (req, res) => {
   try {
     const tasks = await Task.find({ userId: req.user.id, status: 'pending' }).sort({ createdAt: -1 });
@@ -204,7 +203,6 @@ export const getTasks = async (req, res) => {
   }
 };
 
-// Accept task
 export const acceptTask = async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;
@@ -226,7 +224,6 @@ export const acceptTask = async (req, res) => {
   }
 };
 
-// Reject task
 export const rejectTask = async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;
@@ -248,13 +245,11 @@ export const rejectTask = async (req, res) => {
   }
 };
 
-// Fetch accepted tasks grouped by skill
 export const getAcceptedTasks = async (req, res) => {
   try {
     const tasks = await Task.find({ userId: req.user.id, status: 'accepted' }).sort({ createdAt: -1 });
-    // Group tasks by skill (case-insensitive)
     const groupedTasks = tasks.reduce((acc, task) => {
-      const skill = capitalize(task.skill); // Capitalize for display
+      const skill = capitalize(task.skill);
       if (!acc[skill]) {
         acc[skill] = [];
       }
@@ -267,7 +262,6 @@ export const getAcceptedTasks = async (req, res) => {
   }
 };
 
-// Toggle task completion
 export const completeTask = async (req, res) => {
   const { id } = req.params;
   const { completed } = req.body;
@@ -286,6 +280,118 @@ export const completeTask = async (req, res) => {
     await task.save();
     res.json(task);
   } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const analyzeTask = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+  const file = req.file;
+  const { submissionText } = req.body;
+
+  try {
+    const task = await Task.findOne({ _id: id, userId });
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+    if (task.status !== 'accepted') {
+      return res.status(400).json({ message: 'Task must be accepted to analyze' });
+    }
+
+    if (!file && !submissionText) {
+      return res.status(400).json({ message: 'File or text submission required' });
+    }
+
+    const content = file ? file.buffer.toString('utf8') : submissionText;
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+    const prompt = `
+      Analyze the following user submission for the task: "${task.description}".
+      Task details: ${task.detailedDescription}.
+      Skill: ${task.skill}, Level: ${task.skillLevel}.
+      Submission content: ${content}.
+      Provide a score (0-100) and feedback (strengths, weaknesses, suggestions).
+      Return a JSON object:
+      {
+        "score": number,
+        "feedback": {
+          "strengths": string,
+          "weaknesses": string,
+          "suggestions": string
+        }
+      }
+      Ensure the response is valid JSON without markdown wrappers.
+    `;
+
+    try {
+      const result = await model.generateContent(prompt);
+      let text = result.response.text();
+      text = cleanResponse(text);
+
+      let analysis;
+      try {
+        analysis = JSON.parse(text);
+      } catch (parseError) {
+        console.error('❌ Failed to parse analysis response:', text, parseError);
+        return res.status(500).json({ message: 'Invalid analysis response', rawResponse: text });
+      }
+
+      if (typeof analysis.score !== 'number' || analysis.score < 0 || analysis.score > 100) {
+        return res.status(500).json({ message: 'Invalid score in analysis' });
+      }
+
+      if (analysis.score > 80) {
+        task.completed = true;
+        task.status = 'completed';
+        await task.save();
+      }
+
+      res.json(analysis);
+    } catch (aiError) {
+      console.error('❌ AI analysis failed:', aiError);
+      return res.status(500).json({ message: 'AI analysis failed', error: aiError.message });
+    }
+  } catch (error) {
+    console.error('❌ Server error in analyzeTask:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const getTaskById = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const task = await Task.findOne({ _id: id, userId });
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+    res.json(task);
+  } catch (error) {
+    console.error('❌ Error fetching task by ID:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const deleteTask = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const task = await Task.findOne({ _id: id, userId });
+    if (!task) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+    if (task.status !== 'accepted') {
+      return res.status(400).json({ message: 'Only accepted tasks can be deleted' });
+    }
+
+    task.status = 'rejected';
+    await task.save();
+    res.json({ message: 'Task deleted successfully' });
+  } catch (error) {
+    console.error('❌ Error deleting task:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
