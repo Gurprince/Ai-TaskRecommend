@@ -1,8 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { motion } from 'framer-motion';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import '../styles/AnalyzeTask.css';
+
+// Animation variants
+const fadeIn = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.6 } },
+};
 
 const AnalyzeTask = () => {
   const { id } = useParams();
@@ -86,49 +94,63 @@ const AnalyzeTask = () => {
 
   if (!task) {
     return (
-      <div className="container mx-auto p-4 flex justify-center items-center min-h-screen">
-        <p className="text-gray-600 text-lg">Loading task...</p>
-      </div>
+      <motion.div
+        className="analyze-task-loading"
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+      >
+        <svg className="animate-spin h-8 w-8 text-#8C49E9 mr-2 analyze-task-spinner" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+        </svg>
+        Loading task...
+      </motion.div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <ToastContainer />
-      <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Analyze Task: {task.description}</h1>
+    <div className="analyze-task-container">
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
+      <h1 className="analyze-task-title">Analyze Task: {task.description}</h1>
       {error && (
-        <p className="text-red-500 bg-red-100 p-3 rounded-md mb-6 text-center" role="alert">
+        <p className="analyze-task-error max-w-4xl mx-auto" role="alert">
           {error}
         </p>
       )}
 
       {/* Task Details Card */}
-      <div className="bg-white shadow-md rounded-lg p-6 mb-8">
-        <h2 className="text-2xl font-semibold text-gray-700 mb-4">Task Details</h2>
+      <motion.div
+        className="analyze-task-card max-w-[100%] mx-auto"
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+      >
+        <h2 className="analyze-task-card-title">Task Details</h2>
         <div className="space-y-3">
-          <p className="text-gray-600 leading-relaxed">{task.detailedDescription}</p>
-          <p className="text-sm text-gray-500">
-            <span className="font-medium">Skill:</span> {task.skill}
+          <p className="analyze-task-text text-white">{task.detailedDescription}</p>
+          <p className="analyze-task-text text-white">
+            <span className="font-medium ">Skill:</span> {task.skill}
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="analyze-task-text text-white">
             <span className="font-medium">Estimated Time:</span> {task.estimatedTime} hours
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="analyze-task-text text-white">
             <span className="font-medium">Level:</span> {task.skillLevel}
           </p>
-          <p className="text-sm text-gray-500">
-            <span className="font-medium">Goal:</span> {task.goal}
+          <p className="analyze-task-text text-white">
+            <span className="font-medium text-white">Goal:</span> {task.goal}
           </p>
-          <p className="text-sm text-gray-500">
-            <span className="font-medium">Type:</span> {task.type}
+          <p className="analyze-task-text text-white">
+            <span className="font-medium text-white">Type:</span> {task.type}
           </p>
-          <p className="text-sm text-gray-500">
-            <span className="font-medium">Tags:</span> {task.tags.join(', ')}
+          <p className="analyze-task-text text-white">
+            <span className="font-medium text-white">Tags:</span> {task.tags.join(', ')}
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="analyze-task-text text-white">
             <span className="font-medium">Resources:</span>
           </p>
-          <ul className="list-disc pl-5 text-sm text-gray-500">
+          <ul className="list-disc pl-5 analyze-task-text">
             {task.resources.map((resource, index) => (
               <li key={index}>
                 {resource.startsWith('http') ? (
@@ -136,7 +158,7 @@ const AnalyzeTask = () => {
                     href={resource}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-500 hover:underline"
+                    className="analyze-task-resource-link"
                   >
                     {resource}
                   </a>
@@ -147,101 +169,119 @@ const AnalyzeTask = () => {
             ))}
           </ul>
         </div>
-      </div>
+      </motion.div>
 
       {/* Submission Form Card */}
-      <div className="bg-white shadow-md rounded-lg p-6 mb-8">
-        <h2 className="text-2xl font-semibold text-gray-700 mb-4">Submit Your Work</h2>
+      <motion.div
+        className="analyze-task-card max-w-[100%] mx-auto text-white"
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+      >
+        <h2 className="analyze-task-card-title">Submit Your Work</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Upload File</label>
+            <label className="analyze-task-label">Upload File</label>
             <input
               type="file"
               onChange={(e) => setFile(e.target.files[0])}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              className="analyze-task-file-input"
               aria-label="Upload file for task analysis"
               accept=".txt,.py,.js,.html,.css"
             />
             {file && (
-              <p className="mt-2 text-sm text-gray-600">
+              <p className="mt-2 analyze-task-text">
                 Selected: {file.name} ({(file.size / 1024).toFixed(2)} KB)
               </p>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Or Enter Text</label>
+            <label className="analyze-task-label">Or Enter Text</label>
             <textarea
               value={submissionText}
               onChange={(e) => setSubmissionText(e.target.value)}
-              className="w-full p-3 border rounded-md text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="analyze-task-textarea"
               placeholder="Paste your work here (e.g., code, text, or notes)..."
               aria-label="Enter text for task analysis"
               rows="6"
             />
           </div>
-          <div className="flex space-x-4">
+          <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
             <button
               type="submit"
               disabled={loading}
-              className={`flex-1 py-3 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-200 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className="flex-1 analyze-task-submit-button"
               aria-label="Submit for analysis"
             >
-              {loading ? 'Analyzing...' : 'Analyze Submission'}
+              {loading ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 mr-2 text-white inline" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Analyzing...
+                </>
+              ) : (
+                'Analyze Submission'
+              )}
             </button>
             <button
               type="button"
               onClick={handleClear}
-              className="flex-1 py-3 px-4 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition duration-200"
+              className="flex-1 analyze-task-clear-button"
               aria-label="Clear form inputs"
             >
               Clear
             </button>
           </div>
         </form>
-      </div>
+      </motion.div>
 
       {/* Analysis Feedback Card */}
       {analysisResult && (
-        <div
-          className="bg-white shadow-md rounded-lg p-6 animate-fade-in"
+        <motion.div
+          className="analyze-task-card max-w-[100%] mx-auto"
+          initial="hidden"
+          animate="visible"
+          variants={fadeIn}
           aria-live="polite"
         >
-          <h2 className="text-2xl font-semibold text-gray-700 mb-4">Analysis Feedback</h2>
+          <h2 className="analyze-task-card-title">Analysis Feedback</h2>
           <div className="space-y-4">
             <div className="flex items-center">
               <span
-                className={`inline-block px-4 py-2 rounded-full text-white font-semibold ${
+                className={`analyze-task-score ${
                   analysisResult.score > 80
-                    ? 'bg-green-500'
+                    ? 'analyze-task-score-high'
                     : analysisResult.score > 50
-                    ? 'bg-yellow-500'
-                    : 'bg-red-500'
+                    ? 'analyze-task-score-medium'
+                    : 'analyze-task-score-low'
                 }`}
               >
                 Score: {analysisResult.score}/100
               </span>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-700">Strengths:</p>
-              <p className="text-gray-600">{analysisResult.feedback.strengths}</p>
+              <p className="analyze-task-text font-bold text-xl text-purple-600">Strengths:</p>
+              <p className="analyze-task-text text-white">{analysisResult.feedback.strengths}</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-700">Weaknesses:</p>
-              <p className="text-gray-600">{analysisResult.feedback.weaknesses}</p>
+              <p className="analyze-task-text font-bold text-xl text-purple-600">Weaknesses:</p>
+              <p className="analyze-task-text text-white">{analysisResult.feedback.weaknesses}</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-700">Suggestions:</p>
-              <p className="text-gray-600">{analysisResult.feedback.suggestions}</p>
+              <p className="analyze-task-text font-bold text-xl text-purple-600">Suggestions:</p>
+              <p className="analyze-task-text text-white">{analysisResult.feedback.suggestions}</p>
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Back Button */}
       <div className="text-center mt-8">
         <button
           onClick={() => navigate('/accepted-tasks')}
-          className="py-3 px-6 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition duration-200"
+          className="analyze-task-back-button"
           aria-label="Back to accepted tasks"
         >
           Back to Accepted Tasks

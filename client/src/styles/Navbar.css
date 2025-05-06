@@ -1,0 +1,88 @@
+* {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .navbar {
+
+    background-color: #28292A;
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDEyOCAxMjgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGZpbHRlciBpZD0ibm9pc2UiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIuOTgiIG51bU9jdGF2ZXM9IjIiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgaWQ9ImEiIGZpbHRlcj0idXJsKCNub2lzZSkiIC8+PC9zdmc+");
+    background-repeat: repeat;
+    background-blend-mode: multiply;
+    opacity: 0.95;
+    width: 85%;
+    margin: 1rem auto;
+    padding: 1rem 2rem;
+    border-radius: 20px;
+    font-family: 'Inter', sans-serif;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, opacity;
+  }
+  
+  .navbar.hidden {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  
+  .navbar-container {
+    max-width: 1200px; /* Matches max-w-6xl */
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .navbar-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(to right, #8C49E9, #6c38b4);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-decoration: none;
+  }
+  
+  .navbar-links {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  
+  .navbar-links a {
+    color: #D4D4D4;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  
+  .navbar-links a:hover,
+  .navbar-links a:focus {
+    color: #fff;
+  }
+  
+  .navbar-links a:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #8C49E9;
+    border-radius: 4px;
+  }
+  
+  .navbar-logout {
+    background: linear-gradient(to right, #8C49E9, #6c38b4);
+    color: #fff;
+    padding: 9px 20px;
+    font-size: 15px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .navbar-logout:hover {
+    background: linear-gradient(to right, #6c38b4, #5a2e99);
+  }
+  
+  .navbar-logout:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #8C49E9;
+  }

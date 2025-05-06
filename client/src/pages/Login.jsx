@@ -4,11 +4,12 @@ import { motion } from 'framer-motion';
 import { ToastContainer, toast } from 'react-toastify';
 import { AuthContext } from '../context/AuthContext';
 import 'react-toastify/dist/ReactToastify.css';
+import '../styles/Login.css';
 
 // Animation variants
 const fadeIn = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.6 } },
 };
 
 function Login() {
@@ -22,10 +23,10 @@ function Login() {
   if (!authContext) {
     console.error('AuthContext is undefined. Ensure Login is wrapped in AuthProvider.');
     return (
-      <div className="font-roboto bg-gray-100 min-h-screen flex items-center justify-center py-12">
-        <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md text-center">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6">Error</h2>
-          <p className="text-red-500">Authentication context is unavailable. Please check app configuration.</p>
+      <div className="login-container">
+        <div className="login-form text-center">
+          <h2 className="login-title">Error</h2>
+          <p className="login-error">Authentication context is unavailable. Please check app configuration.</p>
         </div>
       </div>
     );
@@ -47,25 +48,23 @@ function Login() {
   };
 
   return (
-    <div className="font-roboto bg-gray-100 min-h-screen flex items-center justify-center py-12">
+    <div className="login-container">
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
       <motion.div
-        className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md"
+        className="login-form"
         initial="hidden"
         animate="visible"
         variants={fadeIn}
       >
-        <h2 className="text-3xl font-bold text-gray-800 text-center mb-6">
-          Log In to SkillSync
-        </h2>
+        <h2 className="login-title">Log In to SkillSync</h2>
         {error && (
-          <p className="text-red-500 bg-red-100 p-3 rounded-lg text-center mb-4" role="alert">
+          <p className="login-error" role="alert">
             {error}
           </p>
         )}
         <form onSubmit={handleSubmit} className="space-y-6" aria-label="Login form">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="email" className="login-label">
               Email
             </label>
             <input
@@ -74,13 +73,13 @@ function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-600 focus:border-blue-600 transition duration-200"
+              className="login-input"
               placeholder="you@example.com"
               aria-required="true"
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="login-label">
               Password
             </label>
             <input
@@ -89,28 +88,28 @@ function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-600 focus:border-blue-600 transition duration-200"
+              className="login-input"
               placeholder="••••••••"
               aria-required="true"
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition duration-200 shadow-md"
+            className="login-button"
             aria-label="Log in"
           >
             Log In
           </button>
         </form>
-        <div className="mt-6 text-center">
-          <p className="text-gray-600">
+        <div className="login-links">
+          <p>
             Don’t have an account?{' '}
-            <Link to="/signup" className="text-blue-600 hover:underline font-semibold" aria-label="Navigate to signup">
+            <Link to="/signup" className="login-link" aria-label="Navigate to signup">
               Sign Up
             </Link>
           </p>
-          <p className="text-gray-600 mt-2">
-            <Link to="/forgot-password" className="text-blue-600 hover:underline font-semibold" aria-label="Navigate to forgot password">
+          <p className="mt-2">
+            <Link to="/forgot-password" className="login-link" aria-label="Navigate to forgot password">
               Forgot Password?
             </Link>
           </p>

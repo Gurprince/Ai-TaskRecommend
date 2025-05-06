@@ -1,11 +1,37 @@
-import { useContext } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
+import '../styles/Navbar.css';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { user, logout } = useContext(AuthContext);
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    let rafId;
+    let timeout;
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setIsVisible(scrollY <= 10); // Small threshold to prevent flicker
+    };
+
+    const onScroll = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(handleScroll);
+      }, 10);
+    };
+
+    window.addEventListener('scroll', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      clearTimeout(timeout);
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -14,31 +40,31 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white shadow-md p-4 sticky top-0 z-50">
-      <div className="container mx-auto max-w-6xl flex justify-between items-center">
-        <Link to="/home" className="text-2xl font-bold text-gray-800 bg-gradient-to-r from-blue-600 to-blue-800 text-transparent bg-clip-text">
+    <nav className={`navbar ${isVisible ? '' : 'hidden'}`}>
+      <div className="navbar-container">
+        <Link to="/home" className="navbar-logo" aria-label="Navigate to home">
           SkillSync
         </Link>
-        <div className="flex space-x-6 items-center">
+        <div className="navbar-links">
           {user ? (
             <>
               <Link
                 to="/tasks"
-                className="text-gray-700 hover:text-blue-600 transition duration-200 font-semibold"
+                className="navbar-link"
                 aria-label="Navigate to tasks"
               >
                 Tasks
               </Link>
               <Link
                 to="/accepted-tasks"
-                className="text-gray-700 hover:text-blue-600 transition duration-200 font-semibold"
+                className="navbar-link"
                 aria-label="Navigate to accepted tasks"
               >
                 Accepted Tasks
               </Link>
               <button
                 onClick={handleLogout}
-                className="py-2 px-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition duration-200 shadow-md"
+                className="navbar-logout"
                 aria-label="Log out"
               >
                 Logout
@@ -48,14 +74,14 @@ const Navbar = () => {
             <>
               <Link
                 to="/login"
-                className="text-gray-700 hover:text-blue-600 transition duration-200 font-semibold"
+                className="navbar-link"
                 aria-label="Navigate to login"
               >
                 Login
               </Link>
               <Link
                 to="/signup"
-                className="text-gray-700 hover:text-blue-600 transition duration-200 font-semibold"
+                className="navbar-link"
                 aria-label="Navigate to signup"
               >
                 Signup

@@ -1,12 +1,15 @@
 import { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { ToastContainer, toast } from 'react-toastify';
 import { AuthContext } from '../context/AuthContext';
+import 'react-toastify/dist/ReactToastify.css';
+import '../styles/Signup.css';
 
 // Animation variants
 const fadeIn = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.6 } },
 };
 
 function Signup() {
@@ -14,36 +17,55 @@ function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { signup } = useContext(AuthContext);
+  const authContext = useContext(AuthContext);
   const navigate = useNavigate();
+
+  // Fallback for undefined context
+  if (!authContext) {
+    console.error('AuthContext is undefined. Ensure Signup is wrapped in AuthProvider.');
+    return (
+      <div className="signup-container">
+        <div className="signup-form text-center">
+          <h2 className="signup-title">Error</h2>
+          <p className="signup-error">Authentication context is unavailable. Please check app configuration.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const { signup } = authContext;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
       await signup(name, email, password);
+      toast.success('Signed up successfully!');
       navigate('/tasks');
     } catch (err) {
       setError(err.message || 'Signup failed');
+      toast.error(err.message || 'Signup failed');
     }
   };
 
   return (
-    <div className="font-roboto bg-gray-100 min-h-screen flex items-center justify-center py-12">
+    <div className="signup-container">
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
       <motion.div
-        className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md"
+        className="signup-form"
         initial="hidden"
         animate="visible"
         variants={fadeIn}
       >
-        <h2 className="text-3xl font-bold text-gray-800 text-center mb-6">
-          Sign Up for SkillSync
-        </h2>
+        <h2 className="signup-title">Sign Up for SkillSync</h2>
         {error && (
-          <p className="text-red-500 text-center mb-4">{error}</p>
+          <p className="signup-error" role="alert">
+            {error}
+          </p>
         )}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6" aria-label="Signup form">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="name" className="signup-label">
               Name
             </label>
             <input
@@ -52,12 +74,13 @@ function Signup() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-600 focus:border-blue-600"
+              className="signup-input"
               placeholder="Your Name"
+              aria-required="true"
             />
           </div>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="email" className="signup-label">
               Email
             </label>
             <input
@@ -66,12 +89,13 @@ function Signup() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-600 focus:border-blue-600"
+              className="signup-input"
               placeholder="you@example.com"
+              aria-required="true"
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="signup-label">
               Password
             </label>
             <input
@@ -80,21 +104,23 @@ function Signup() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-600 focus:border-blue-600"
+              className="signup-input"
               placeholder="••••••••"
+              aria-required="true"
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-full font-semibold hover:bg-blue-700 transition-colors"
+            className="signup-button"
+            aria-label="Sign up"
           >
             Sign Up
           </button>
         </form>
-        <div className="mt-6 text-center">
-          <p className="text-gray-600">
+        <div className="signup-links">
+          <p>
             Already have an account?{' '}
-            <Link to="/login" className="text-blue-600 hover:underline font-semibold">
+            <Link to="/login" className="signup-link" aria-label="Navigate to login">
               Log In
             </Link>
           </p>
