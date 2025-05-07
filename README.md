@@ -57,8 +57,8 @@ Git
 Steps
 
 Clone the Repository:
-git clone https://github.com/yourusername/skill-sync-ai.git
-cd skill-sync-ai
+git clone https://github.com/Gurprince/Ai-TaskRecommend
+cd Ai-TaskRecommend
 
 Set Up Frontend:
 cd client
